@@ -1,3 +1,33 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Room Rush — Trivia together</title><link rel="stylesheet" href="/style.css"></head><body><main><header><b>✦ ROOM RUSH</b><span>● LIVE PARTY GAME</span></header>
-<section id="home"><small>THE QUICK-FIRE QUIZ</small><h1>Big brain.<br><em>Good company.</em></h1><p>A tiny trivia showdown for your favorite people. Make a room, share the code, and let the smartest friend win.</p><label for="name">YOUR NAME</label><input id="name" maxlength="20" placeholder="e.g. Alex"><div class="actions"><button id="create">Host a game ↗</button><div><input id="code" maxlength="4" placeholder="ROOM CODE"><button id="join">Join room</button></div></div><div class="steps">01 Host a room　　02 Share the code　　03 Play to win</div><div id="homeError" class="error"></div></section>
-<section id="game" class="hidden"><div class="head"><div><small id="role"></small><h2 id="title"></h2></div><div class="room">ROOM CODE <b id="codeShow"></b><button id="copy">Copy</button></div></div><div class="layout"><article><small id="pill"></small><div id="content"></div><div id="controls"></div></article><aside><b>PLAYERS <span id="count"></span></b><div id="players"></div></aside></div><div id="gameError" class="error"></div><button id="leave" class="leave">← Leave room</button></section><footer>MADE FOR THE GROUP CHAT ✦</footer></main><script src="/app.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101226">
+<title>Room Rush — Trivia together</title><link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+<main>
+<header><a class="brand" href="/"><i>✦</i> ROOM RUSH</a><span class="live"><i></i> LIVE PARTY GAME</span></header>
+<section id="home">
+<div class="hero-copy">
+<div class="season"><b>SEASON 01</b> THE QUICK-FIRE QUIZ</div>
+<h1>Bring the<br><em>party energy.</em></h1>
+<p>Make a room, rally your crew, and race through a high-voltage trivia showdown from any screen.</p>
+<div class="feature-list"><span>⚡ 8 rapid rounds</span><span>✦ Up to 20 players</span><span>⌁ Free to play</span></div>
+<div class="form-card"><label for="name">PLAYER TAG</label><input id="name" maxlength="20" placeholder="e.g. Alex"><div class="actions"><button id="create">Create a room <b>↗</b></button><div><input id="code" maxlength="4" placeholder="ROOM CODE"><button id="join">Join</button></div></div></div>
+<div id="homeError" class="error"></div>
+</div>
+<div class="hero-visual" aria-hidden="true">
+<div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+<div class="game-card"><div><span>ROOM RUSH</span><b>08:42</b></div><h2>WHO'S TAKING<br>THE CROWN?</h2><section><i class="active">A&nbsp; YOU</i><i>B&nbsp; THEM</i><i>C&nbsp; BOTH</i><i>D&nbsp; CHAOS</i></section><footer><span>ROUND <b>04/08</b></span><strong>● LIVE</strong></footer></div>
+<div class="float-chip chip-one">+100 <small>PERFECT</small></div><div class="float-chip chip-two">✦ 12 PLAYERS</div>
+</div>
+<div class="steps"><span><b>01</b> Create a room</span><span><b>02</b> Share the code</span><span><b>03</b> Play for glory</span></div>
+</section>
+<section id="game" class="hidden">
+<div class="head"><div><small id="role"></small><h2 id="title"></h2></div><div class="room">ROOM CODE <b id="codeShow"></b><button id="copy">Copy code</button></div></div>
+<div class="layout"><article><small id="pill"></small><div id="content"></div><div id="controls"></div></article><aside><b>LEADERBOARD <span id="count"></span></b><div id="players"></div><small class="score-note">SCORE 100 FOR EVERY HIT</small></aside></div>
+<div id="gameError" class="error"></div><button id="leave" class="leave">← Leave room</button>
+</section>
+<footer class="page-footer">MADE FOR THE GROUP CHAT <b>✦</b> NO DOWNLOAD NEEDED</footer>
+</main><script src="/app.js"></script></body></html>
