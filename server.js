@@ -1,254 +1,130 @@
-const http = require('node:http');
-const fs = require('node:fs');
-const path = require('node:path');
-const crypto = require('node:crypto');
+const express = require("express");
+const http = require("http");
+const path = require("path");
+const { Server } = require("socket.io");
 
-const PORT = Number(process.env.PORT || 3000);
-const ROUND_SECONDS = 20;
-const MAX_PLAYERS = 20;
-const rooms = new Map();
-
-const qs = [
-  { category: 'Science', text: 'Which planet has the most moons currently confirmed?', options: ['Jupiter', 'Saturn', 'Neptune', 'Uranus'], answer: 1 },
-  { category: 'Nature', text: 'What is the only mammal capable of true flight?', options: ['Flying squirrel', 'Sugar glider', 'Bat', 'Colugo'], answer: 2 },
-  { category: 'History', text: 'Which country gifted the Statue of Liberty to the United States?', options: ['France', 'Italy', 'Spain', 'Canada'], answer: 0 },
-  { category: 'Math', text: 'How many sides does a dodecagon have?', options: ['10', '11', '12', '14'], answer: 2 },
-  { category: 'Geography', text: 'What is the largest ocean on Earth?', options: ['Atlantic', 'Indian', 'Arctic', 'Pacific'], answer: 3 },
-  { category: 'Music', text: 'Which instrument has 88 keys on a standard version?', options: ['Accordion', 'Piano', 'Harpsichord', 'Organ'], answer: 1 },
-  { category: 'Nature', text: 'What do bees collect from flowers to make honey?', options: ['Pollen', 'Nectar', 'Sap', 'Dew'], answer: 1 },
-  { category: 'Sports', text: 'In which sport would you perform a slam dunk?', options: ['Volleyball', 'Handball', 'Basketball', 'Netball'], answer: 2 },
-  { category: 'Science', text: 'What is the chemical symbol for gold?', options: ['Ag', 'Gd', 'Au', 'Go'], answer: 2 },
-  { category: 'Technology', text: 'What does CPU stand for?', options: ['Central Processing Unit', 'Computer Power Utility', 'Core Program Upload', 'Central Program User'], answer: 0 },
-  { category: 'Geography', text: 'Which is the smallest continent by land area?', options: ['Europe', 'Australia', 'South America', 'Antarctica'], answer: 1 },
-  { category: 'Science', text: 'How many bones are typically in an adult human body?', options: ['186', '206', '226', '246'], answer: 1 }
+const QUESTIONS = [
+  { q: "Which planet is known as the Red Planet?", a: ["Venus", "Mars", "Jupiter", "Mercury"], correct: 1, category: "Science" },
+  { q: "What is the capital city of Japan?", a: ["Seoul", "Beijing", "Tokyo", "Bangkok"], correct: 2, category: "Geography" },
+  { q: "How many sides does a hexagon have?", a: ["Five", "Six", "Seven", "Eight"], correct: 1, category: "General" },
+  { q: "Which language runs natively in web browsers?", a: ["Python", "C++", "Java", "JavaScript"], correct: 3, category: "Technology" },
+  { q: "What is the largest ocean on Earth?", a: ["Atlantic", "Indian", "Arctic", "Pacific"], correct: 3, category: "Geography" },
+  { q: "Which gas do plants absorb from the atmosphere?", a: ["Oxygen", "Carbon dioxide", "Nitrogen", "Hydrogen"], correct: 1, category: "Science" },
+  { q: "How many minutes are in two hours?", a: ["90", "100", "120", "180"], correct: 2, category: "General" },
+  { q: "Which company created the Windows operating system?", a: ["Apple", "Microsoft", "IBM", "Google"], correct: 1, category: "Technology" },
+  { q: "What is the chemical symbol for gold?", a: ["Ag", "Gd", "Au", "Go"], correct: 2, category: "Science" },
+  { q: "Which animal is the fastest land animal?", a: ["Lion", "Horse", "Cheetah", "Leopard"], correct: 2, category: "Nature" },
+  { q: "Which continent is the Sahara Desert in?", a: ["Asia", "Africa", "Australia", "South America"], correct: 1, category: "Geography" },
+  { q: "What is 9 × 7?", a: ["56", "63", "72", "69"], correct: 1, category: "Numbers" }
 ];
 
-const send = (res, status, data) => {
-  res.writeHead(status, {
-    'content-type': 'application/json; charset=utf-8',
-    'cache-control': 'no-store'
-  });
-  res.end(JSON.stringify(data));
+const rooms = new Map();
+const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const makeCode = () => {
+  let code;
+  do { code = Array.from({length: 4}, () => alphabet[Math.floor(Math.random()*alphabet.length)]).join(""); }
+  while (rooms.has(code));
+  return code;
 };
-
-const safe = value => String(value || 'Player')
-  .trim()
-  .replace(/[<>]/g, '')
-  .replace(/\s+/g, ' ')
-  .slice(0, 20) || 'Player';
-
-async function read(req) {
-  let body = '';
-  for await (const chunk of req) {
-    body += chunk;
-    if (body.length > 100_000) throw new Error('Request body too large');
-  }
-  try { return JSON.parse(body || '{}'); } catch { return {}; }
-}
-
-function expireRound(room) {
-  if (room.started && !room.revealed && room.i < room.questions.length &&
-      Date.now() >= room.deadline) {
-    room.revealed = true;
-    room.players.forEach(player => {
-      if (player.answered === null) player.answered = -1;
-    });
-  }
-}
-
-function view(room, id) {
-  expireRound(room);
-  const finished = room.started && room.i >= room.questions.length;
-  const question = room.started && !finished ? room.questions[room.i] : null;
-  const players = [...room.players.values()].map(p => ({
-    id: p.id,
-    name: p.name,
-    score: p.score,
-    streak: p.streak,
-    bestStreak: p.bestStreak,
-    answered: p.answered,
-    lastPoints: p.lastPoints
-  }));
-
-  return {
-    code: room.code,
-    hostId: room.host,
-    players,
-    started: room.started,
-    finished,
-    i: room.i,
-    total: room.questions.length,
-    revealed: room.revealed,
-    deadline: room.deadline,
-    serverNow: Date.now(),
-    roundSeconds: ROUND_SECONDS,
-    q: question ? {
-      text: question.text,
-      category: question.category,
-      options: question.options,
-      answer: room.revealed ? question.answer : null
-    } : null,
-    myId: id || null
-  };
-}
-
-function startRound(room) {
-  room.revealed = false;
-  room.deadline = Date.now() + ROUND_SECONDS * 1000;
-  room.players.forEach(player => {
-    player.answered = null;
-    player.lastPoints = 0;
-  });
-}
-
-function routeError(res, status, message) {
-  return send(res, status, { error: message });
-}
-
-const mime = {
-  '.css': 'text/css',
-  '.js': 'text/javascript',
-  '.svg': 'image/svg+xml',
-  '.json': 'application/json',
-  '.html': 'text/html'
-};
-
-const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, 'http://localhost');
-  if (url.pathname.startsWith('/api/')) {
-    try {
-      if (req.method === 'POST' && url.pathname === '/api/rooms') {
-        const body = await read(req);
-        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-        let code;
-        do {
-          code = Array.from({ length: 4 }, () => chars[crypto.randomInt(chars.length)]).join('');
-        } while (rooms.has(code));
-
-        const id = crypto.randomUUID();
-        const room = {
-          code,
-          host: id,
-          players: new Map([[id, {
-            id, name: safe(body.name || 'Host'), score: 0,
-            streak: 0, bestStreak: 0, answered: null, lastPoints: 0
-          }]]),
-          started: false,
-          i: 0,
-          revealed: false,
-          deadline: null,
-          questions: qs.slice()
-        };
-        rooms.set(code, room);
-        return send(res, 201, view(room, id));
-      }
-
-      const parts = url.pathname.split('/').filter(Boolean);
-      const code = (parts[2] || '').toUpperCase();
-      const room = rooms.get(code);
-      if (!room) return routeError(res, 404, 'Room not found. Check the code and try again.');
-
-      if (req.method === 'GET' && parts.length === 3) {
-        const playerId = url.searchParams.get('playerId');
-        if (playerId && !room.players.has(playerId)) {
-          return routeError(res, 403, 'You are no longer a member of this room.');
-        }
-        return send(res, 200, view(room, playerId));
-      }
-
-      if (req.method === 'POST' && parts[3] === 'join') {
-        const body = await read(req);
-        if (room.started) return routeError(res, 409, 'This game has already started.');
-        if (room.players.size >= MAX_PLAYERS) return routeError(res, 409, `This room is full (${MAX_PLAYERS} players max).`);
-        const id = crypto.randomUUID();
-        room.players.set(id, {
-          id, name: safe(body.name), score: 0,
-          streak: 0, bestStreak: 0, answered: null, lastPoints: 0
-        });
-        return send(res, 201, view(room, id));
-      }
-
-      if (req.method === 'POST') {
-        const body = await read(req);
-        const player = room.players.get(body.playerId);
-        const isHost = body.playerId === room.host;
-        if (!player) return routeError(res, 403, 'You are not in this room.');
-
-        if (parts[3] === 'start' && isHost && !room.started) {
-          room.started = true;
-          room.i = 0;
-          startRound(room);
-        } else if (parts[3] === 'answer') {
-          expireRound(room);
-          if (!room.started || room.revealed || room.i >= room.questions.length) {
-            return routeError(res, 409, 'This question is closed.');
-          }
-          if (Date.now() >= room.deadline) {
-            expireRound(room);
-            return routeError(res, 409, 'Time is up for this question.');
-          }
-          if (player.answered !== null) return routeError(res, 409, 'Your answer is already locked in.');
-          if (!Number.isInteger(body.choice) || body.choice < 0 || body.choice >= room.questions[room.i].options.length) {
-            return routeError(res, 400, 'Choose a valid answer.');
-          }
-
-          player.answered = body.choice;
-          const question = room.questions[room.i];
-          if (body.choice === question.answer) {
-            const remaining = Math.max(0, room.deadline - Date.now());
-            const speedBonus = Math.floor((remaining / (ROUND_SECONDS * 1000)) * 50);
-            player.streak += 1;
-            player.bestStreak = Math.max(player.bestStreak, player.streak);
-            const streakBonus = player.streak >= 3 ? 25 : 0;
-            player.lastPoints = 100 + speedBonus + streakBonus;
-            player.score += player.lastPoints;
-          } else {
-            player.streak = 0;
-            player.lastPoints = 0;
-          }
-        } else if (parts[3] === 'reveal' && isHost && room.started && room.i < room.questions.length) {
-          expireRound(room);
-          room.revealed = true;
-          room.players.forEach(entry => {
-            if (entry.answered === null) entry.answered = -1;
-          });
-        } else if (parts[3] === 'next' && isHost && room.revealed && room.i < room.questions.length) {
-          room.i += 1;
-          if (room.i < room.questions.length) startRound(room);
-          else room.deadline = null;
-        } else {
-          return routeError(res, 403, 'That action is not allowed.');
-        }
-        return send(res, 200, view(room, body.playerId));
-      }
-
-      return routeError(res, 404, 'Unknown API route.');
-    } catch (error) {
-      return routeError(res, error.message === 'Request body too large' ? 413 : 400,
-        error.message === 'Request body too large' ? error.message : 'Could not process that request.');
-    }
-  }
-
-  const publicDir = path.join(__dirname, 'public');
-  let relative;
-  try { relative = url.pathname === '/' ? 'index.html' : decodeURIComponent(url.pathname).replace(/^\/+/, ''); }
-  catch { res.writeHead(400); return res.end('Bad request'); }
-  const filePath = path.resolve(publicDir, relative);
-  if (filePath !== publicDir && !filePath.startsWith(publicDir + path.sep)) {
-    res.writeHead(403); return res.end('Forbidden');
-  }
-  fs.readFile(filePath, (error, data) => {
-    if (error) { res.writeHead(404); return res.end('Not found'); }
-    res.writeHead(200, { 'content-type': (mime[path.extname(filePath)] || 'application/octet-stream') + '; charset=utf-8' });
-    res.end(data);
-  });
+const publicRoom = (room, playerId) => ({
+  code: room.code, hostId: room.hostId, status: room.status, round: room.round,
+  totalRounds: room.totalRounds, deadline: room.deadline,
+  players: [...room.players.values()].map(p => ({ id:p.id, name:p.name, score:p.score, answered:p.answered, connected:p.connected })),
+  question: ["question", "reveal"].includes(room.status) ? { q: room.current.q, a: room.current.a, category: room.current.category } : null,
+  reveal: room.status === "reveal" ? { correct: room.current.correct, explanation: "The correct answer is highlighted below." } : null,
+  myId: playerId || null
 });
+function startServer({ port = Number(process.env.PORT) || 3000, host = "0.0.0.0" } = {}) {
+  const app = express();
+  const server = http.createServer(app);
+  const io = new Server(server, { cors: { origin: "*" } });
+  app.use(express.static(path.join(__dirname, "public")));
+  app.get("/health", (_req,res) => res.json({ ok:true, game:"Room Rush" }));
 
-setInterval(() => {
-  for (const [code, room] of rooms) {
-    expireRound(room);
-    if (Date.now() - (room.lastSeen || Date.now()) > 6 * 60 * 60 * 1000) rooms.delete(code);
+  function emitRoom(room) { io.to(room.code).emit("state", publicRoom(room)); }
+  function endRoom(room) {
+    clearTimeout(room.timer);
+    room.status = "finished";
+    room.deadline = null;
+    emitRoom(room);
   }
-}, 1000).unref();
-
-server.listen(PORT, '0.0.0.0', () => console.log(`Room Rush 2.0 on http://localhost:${PORT}`));
+  function reveal(room) {
+    if (!room || room.status !== "question") return;
+    clearTimeout(room.timer);
+    room.status = "reveal";
+    room.deadline = Date.now() + 2500;
+    emitRoom(room);
+    room.timer = setTimeout(() => {
+      if (!rooms.has(room.code) || room.status !== "reveal") return;
+      if (room.round >= room.totalRounds) return endRoom(room);
+      nextQuestion(room);
+    }, 2500);
+  }
+  function nextQuestion(room) {
+    room.round += 1;
+    room.current = room.questions[room.round - 1];
+    room.status = "question";
+    room.deadline = Date.now() + 15000;
+    for (const p of room.players.values()) p.answered = null;
+    emitRoom(room);
+    room.timer = setTimeout(() => reveal(room), 15000);
+  }
+  io.on("connection", socket => {
+    socket.on("createRoom", ({ name }, cb = () => {}) => {
+      const clean = String(name || "Player").trim().slice(0, 18) || "Player";
+      const code = makeCode();
+      const id = socket.id;
+      const room = { code, hostId:id, status:"lobby", round:0, totalRounds:8, deadline:null, timer:null,
+        players:new Map([[id,{id,name:clean,score:0,answered:null,connected:true}]]),
+        questions:[...QUESTIONS].sort(() => Math.random()-.5).slice(0,8), current:null };
+      rooms.set(code, room); socket.join(code);
+      cb({ ok:true, state:publicRoom(room,id) }); emitRoom(room);
+    });
+    socket.on("joinRoom", ({ code, name }, cb = () => {}) => {
+      code = String(code || "").trim().toUpperCase();
+      const room = rooms.get(code);
+      if (!room) return cb({ ok:false, error:"Room not found. Check the code and try again." });
+      if (room.status !== "lobby") return cb({ ok:false, error:"This game has already started." });
+      if (room.players.size >= 20) return cb({ ok:false, error:"This room is full (20 players max)." });
+      const clean = String(name || "Player").trim().slice(0,18) || "Player";
+      const id = socket.id;
+      room.players.set(id,{id,name:clean,score:0,answered:null,connected:true});
+      socket.join(code); cb({ok:true,state:publicRoom(room,id)}); emitRoom(room);
+    });
+    socket.on("startGame", ({code}, cb=()=>{}) => {
+      const room = rooms.get(String(code||"").toUpperCase());
+      if (!room) return cb({ok:false,error:"Room no longer exists."});
+      if (socket.id !== room.hostId) return cb({ok:false,error:"Only the host can start the game."});
+      if (room.players.size < 2) return cb({ok:false,error:"Invite at least one more player to start."});
+      if (room.status !== "lobby") return cb({ok:false,error:"The game has already started."});
+      nextQuestion(room); cb({ok:true});
+    });
+    socket.on("answer", ({code, answer}, cb=()=>{}) => {
+      const room = rooms.get(String(code||"").toUpperCase());
+      if (!room || room.status !== "question") return cb({ok:false,error:"This question is no longer active."});
+      const p = room.players.get(socket.id);
+      if (!p) return cb({ok:false,error:"You are not in this room."});
+      if (p.answered !== null) return cb({ok:false,error:"Answer already submitted."});
+      if (!Number.isInteger(answer) || answer < 0 || answer > 3) return cb({ok:false,error:"Invalid answer."});
+      p.answered = answer;
+      if (answer === room.current.correct) {
+        const remaining = Math.max(0, room.deadline - Date.now());
+        p.score += 100 + Math.round(remaining / 15000 * 50);
+      }
+      emitRoom(room); cb({ok:true});
+      if ([...room.players.values()].every(x => x.answered !== null)) reveal(room);
+    });
+    socket.on("disconnect", () => {
+      for (const room of rooms.values()) {
+        if (room.players.has(socket.id)) {
+          const p = room.players.get(socket.id); p.connected = false;
+          // Keep the player and score for this game; rooms are cleared after completion.
+          emitRoom(room);
+        }
+      }
+    });
+  });
+  return new Promise(resolve => server.listen(port, host, () => resolve({app,server,io,port:server.address().port})));
+}
+if (require.main === module) startServer().then(({port}) => console.log(`Room Rush server running at http://localhost:${port}`));
+module.exports = { startServer };

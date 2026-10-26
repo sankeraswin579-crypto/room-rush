@@ -1,248 +1,315 @@
-# 🎮 Room Rush 2.0
+# 🎮 Room Rush — Multiplayer Trivia Game
 
-**A real-time multiplayer trivia game where friends compete to answer questions, earn points, build streaks, and reach the top of the leaderboard.**
+**Room Rush** is a multiplayer trivia gaming application built with JavaScript, Node.js, Express.js, Socket.IO, and Electron. It features a browser-based game interface and a Windows desktop application packaged using Electron Builder.
 
-Room Rush is a browser-based party game built with Node.js, HTML, CSS, and JavaScript. Players can join a shared game room using a room code and compete in timed trivia rounds.
+The project explores real-time multiplayer application development, game-room management, client-server communication, and desktop application packaging.
 
-## ✨ Features
+## 🚀 Project Overview
 
-- **Multiplayer rooms** — Create a room and invite players using a room code.
-- **Host controls** — The host can start the game and control question progression.
-- **Timed questions** — Each question has a 20-second answer window.
-- **Trivia question bank** — Questions are organized into categories.
-- **Speed bonuses** — Earn additional points for answering correctly faster.
-- **Streak bonuses** — Build consecutive correct answers to earn extra points.
-- **Live leaderboard** — Track player scores during the game.
-- **Final podium** — Highlight the top three players at the end.
-- **Answer validation** — Reject duplicate, invalid, or late answers on the server.
-- **Responsive interface** — Play through a browser on supported desktop and mobile screens.
-- **Dark neon design** — A gaming-inspired interface with bold typography and vibrant accents.
+Room Rush allows players to enter a trivia game environment, create or join a room using a room code, and view players in a waiting room before the host starts a match.
 
-## 🕹️ How to Play
+The application runs locally through a Node.js server and can also be packaged as a Windows desktop application.
 
-1. Open Room Rush in a web browser.
-2. Create a new game room.
-3. Share the room code with friends.
-4. Let other players join the room.
-5. The host starts the game.
-6. Answer each trivia question before the timer expires.
-7. Earn points for correct answers, with additional bonuses for speed and streaks.
-8. Follow the leaderboard as scores change.
-9. Check the final podium to see who finishes in the top three.
+### Key Highlights
+
+- 🎮 Multiplayer trivia game concept
+- 🔑 Room codes for identifying game rooms
+- 👥 Player list and waiting-room interface
+- ⚡ Real-time communication using Socket.IO
+- 🌐 Browser-based game interface
+- 🖥️ Windows desktop application powered by Electron
+- 📦 Windows installer generated using Electron Builder and NSIS
+- 🎨 Dark, gaming-inspired user interface
 
 ## 🛠️ Technology Stack
 
 | Technology | Purpose |
 |---|---|
-| Node.js | Server-side JavaScript runtime |
-| Node.js HTTP module | HTTP server and request handling |
-| HTML5 | Game structure |
-| CSS3 | Styling, responsive layout, and visual effects |
-| Vanilla JavaScript | Frontend interactions and game logic |
-| JSON | Trivia question and game-mode data |
-| In-memory storage | Active rooms and player game state |
+| JavaScript | Application logic |
+| Node.js | JavaScript runtime and server execution |
+| Express.js | HTTP server and static file delivery |
+| Socket.IO | Real-time client-server communication |
+| HTML5 | Game interface structure |
+| CSS3 | Styling and responsive presentation |
+| Electron.js | Windows desktop application |
+| Electron Builder | Application packaging and distribution |
+| NSIS | Windows installer generation |
+| npm | Dependency management and project scripts |
 
-The application uses Node.js built-in modules for its server, so no external runtime dependencies are required for the basic server.
+## 🏗️ Application Architecture
+
+```text
+Room Rush
+│
+├── Frontend
+│   ├── HTML
+│   ├── CSS
+│   └── JavaScript
+│
+├── Backend
+│   ├── Node.js
+│   ├── Express.js
+│   └── Socket.IO
+│
+├── Desktop Application
+│   └── Electron
+│
+└── Build and Distribution
+    ├── Electron Builder
+    ├── NSIS
+    └── Windows Installer (.exe)
+```
+
+### How It Works
+
+1. The Node.js server starts and serves the game interface.
+2. Players access the game through a browser or the desktop application.
+3. The game interface displays room information and player details.
+4. Socket.IO provides the real-time communication layer for multiplayer features.
+5. Electron wraps the web application in a desktop window.
+6. Electron Builder packages the application into a Windows installer.
+
+## ✨ Features
+
+### 1. Game Room Interface
+
+Players can access a game-room interface that displays a room code and the current player list.
+
+### 2. Room Codes
+
+A room code provides a convenient way to identify a game room and share joining information with other players.
+
+### 3. Multiplayer Waiting Room
+
+The waiting room displays the host, player count, player names, and the waiting status before a game begins.
+
+### 4. Trivia Gameplay
+
+Room Rush is designed around quiz-based multiplayer gameplay. The complete question, scoring, and results flow should be tested to verify that all game mechanics work correctly.
+
+### 5. Windows Desktop Application
+
+The application can be packaged and installed on Windows using Electron and Electron Builder.
+
+### 6. Browser-Based Development
+
+The web interface can be accessed locally during development, making it easier to test interface changes and server behavior.
+
+## 💻 Installation
+
+### Option 1: Install the Windows Application
+
+Download or locate the generated Windows installer:
+
+`Room Rush Setup 1.0.0.exe`
+
+Run the installer and follow the on-screen instructions.
+
+After installation, launch **Room Rush** from the Windows Start menu or desktop shortcut, if available.
+
+### Option 2: Run from Source
+
+#### Prerequisites
+
+- Node.js
+- npm
+- Git (for cloning the repository)
+
+#### Step 1: Clone the repository
+
+```bash
+git clone https://github.com/sankeraswin579-crypto/room-rush.git
+```
+
+#### Step 2: Navigate to the project
+
+```bash
+cd room-rush
+```
+
+#### Step 3: Install dependencies
+
+```bash
+npm install
+```
+
+#### Step 4: Start the server
+
+```bash
+npm start
+```
+
+#### Step 5: Open the application
+
+Visit:
+
+`http://localhost:3000`
+
+Keep the server terminal open while using the locally hosted game.
+
+## 🖥️ Run the Desktop Application in Development
+
+To launch the Electron desktop application from the source project:
+
+```bash
+npm run desktop
+```
+
+This command uses the Electron entry point configured in the project.
+
+## 📦 Build the Windows Installer
+
+To generate the Windows installer:
+
+```bash
+npm run build:win
+```
+
+The build uses Electron Builder with the NSIS installer target.
+
+The expected installer location is:
+
+```text
+release/
+└── Room Rush Setup 1.0.0.exe
+```
+
+The packaged, unpacked application is expected under:
+
+```text
+release/
+└── win-unpacked/
+    └── Room Rush.exe
+```
+
+The exact output files should be verified after each build.
 
 ## 📁 Project Structure
 
 ```text
 room-rush/
-├── server.js
-├── package.json
-├── README.md
-├── .gitignore
+│
+├── electron/
+│   └── main.js
+│
 ├── public/
 │   ├── index.html
-│   ├── style.css
 │   ├── app.js
-│   ├── room-rush-2.css
-│   ├── assets/
+│   ├── style.css
 │   └── data/
 │       └── game-modes.json
-└── docs/
-    └── UI_KIT.md
+│
+├── server.js
+├── package.json
+├── package-lock.json
+├── README.md
+├── .gitignore
+└── release/
 ```
 
-**File responsibilities**
+The `release/` directory is generated during packaging and may be excluded from Git version control.
 
-- `server.js` — Creates the HTTP server, manages rooms and players, handles game actions, validates answers, and processes scoring.
-- `package.json` — Defines project metadata and commands for running the application.
-- `public/index.html` — Provides the main game interface.
-- `public/style.css` — Contains the main visual styles.
-- `public/room-rush-2.css` — Contains additional Room Rush 2.0 styling.
-- `public/app.js` — Manages browser interactions, room updates, the timer display, answers, and leaderboard rendering.
-- `public/assets/` — Stores the project's visual assets.
-- `public/data/game-modes.json` — Defines game-mode information.
-- `docs/UI_KIT.md` — Documents the user interface design system.
+## 🔧 Troubleshooting
 
-## ⚙️ Requirements
+### Port 3000 is already in use
 
-- Node.js installed on the computer.
-- A modern web browser.
-- A terminal such as Windows PowerShell.
+If the server reports `EADDRINUSE`, another process may already be using port 3000.
 
-Check the Node.js installation:
+Check the port in Windows PowerShell:
 
 ```powershell
-node --version
-npm --version
+netstat -ano | findstr :3000
 ```
 
-## 🚀 Installation and Setup
+Identify the process before stopping it, then restart the application.
 
-### 1. Clone the repository
+### Windows installer build fails
 
-```powershell
-git clone https://github.com/sankeraswin579-crypto/room-rush.git
-cd room-rush
-```
-
-### 2. Install dependencies
-
-The current server uses Node.js built-in modules and does not require external packages for its basic functionality.
-
-If the project contains a `package.json` with dependencies, install them using:
+Check that dependencies are installed:
 
 ```powershell
 npm install
 ```
 
-### 3. Start the server
-
-If `package.json` defines a start script:
+Then retry:
 
 ```powershell
-npm start
+npm run build:win
 ```
 
-Alternatively, start the server directly:
+If an error persists, review the complete Electron Builder output.
+
+### Dependency security warnings
+
+Run:
 
 ```powershell
-node server.js
+npm audit
 ```
 
-### 4. Open the application
+Review the reported vulnerabilities and update affected dependencies carefully. Avoid forced dependency upgrades without reviewing their potential breaking changes.
 
-Visit:
+## 🌐 Online Multiplayer
 
-```text
-http://localhost:3000
-```
+The current development workflow uses a local Node.js server.
 
-The server uses port `3000` by default.
+For players on different computers to join over the internet, the backend must be deployed to a publicly accessible host that supports persistent Node.js processes and Socket.IO connections.
 
-Keep the terminal running while playing.
+The desktop application must then be configured to connect to that public server.
 
-## 🧮 Scoring System
+Online multiplayer deployment and cross-network gameplay should be treated as separate milestones from building the Windows installer.
 
-Room Rush 2.0 introduces a scoring system designed to reward both accuracy and speed.
+## 🔒 Security and Reliability
 
-| Scoring component | Rule |
-|---|---|
-| Correct answer | 100 base points |
-| Speed bonus | Up to 50 additional points |
-| Streak bonus | 25 additional points when the streak bonus condition is met |
-| Incorrect answer | No correct-answer points |
-| Late answer | Rejected |
+Before a public release:
 
-The speed bonus decreases according to the time taken to answer. A streak bonus is awarded when the configured consecutive-correct-answer condition is reached.
+- Review and remediate dependency vulnerabilities.
+- Validate room codes and player actions on the server.
+- Test multiple simultaneous players.
+- Handle disconnects and server restarts.
+- Test the complete quiz and scoring flow.
+- Configure secure production hosting.
+- Consider code signing for Windows distribution.
 
-**Note:** The exact scoring implementation in `server.js` is authoritative if it differs from this documentation.
+## 🗺️ Future Improvements
 
-## 🏗️ Application Architecture
+- Complete end-to-end multiplayer gameplay testing
+- Public online multiplayer server
+- Improved room management and reconnection handling
+- Expanded trivia categories and game modes
+- Leaderboards and match history
+- Improved error handling
+- Application icon and branding
+- Dependency security updates
+- Automated tests and continuous integration
+- Signed Windows releases
 
-Room Rush uses a client-server architecture.
+## 🎯 Learning Outcomes
 
-```text
-Player's Browser
-       |
-       | HTTP requests
-       v
-Node.js HTTP Server
-       |
-       +-- Room Management
-       |
-       +-- Player Management
-       |
-       +-- Question and Round Logic
-       |
-       +-- Answer Validation
-       |
-       +-- Scoring and Leaderboard
-       |
-       v
-In-Memory Game State
-```
+This project provides practical experience with:
 
-The browser communicates with the server to retrieve room and game updates. The current implementation uses polling rather than WebSockets.
+- JavaScript application development
+- Node.js backend execution
+- Express.js server setup
+- Real-time communication concepts using Socket.IO
+- Client-server architecture
+- Electron desktop application development
+- Windows application packaging
+- npm dependency management
+- Troubleshooting local server and build errors
 
-## 🔒 Current Limitations
+## 👨‍💻 Author
 
-- **In-memory state:** Active rooms and scores are not persisted in a database.
-- **Restart behavior:** Restarting the server clears in-memory game sessions.
-- **Polling:** Browser clients periodically request updates rather than using a persistent WebSocket connection.
-- **No persistent profiles:** Player accounts and long-term statistics are not stored.
-- **Local development:** Other players may need a properly configured network-accessible deployment to connect from different devices.
+**Aswin Sankar P S**
 
-## 🧪 Testing Checklist
+GitHub: [@sankeraswin579-crypto](https://github.com/sankeraswin579-crypto)
 
-Before publishing a release, verify the following:
-
-- [ ] The server starts without errors.
-- [ ] The home page loads successfully.
-- [ ] A host can create a room.
-- [ ] Players can join using a room code.
-- [ ] The host can start a game.
-- [ ] The question timer counts down correctly.
-- [ ] Correct and incorrect answers are handled properly.
-- [ ] Late and duplicate answers are rejected.
-- [ ] Speed and streak bonuses are calculated correctly.
-- [ ] The leaderboard updates correctly.
-- [ ] The final podium displays the correct top three players.
-- [ ] Multiple browsers can participate in the same game.
-- [ ] The application works on supported mobile and desktop screen sizes.
-
-## 🔮 Future Improvements
-
-Potential future enhancements include:
-
-- WebSocket-based real-time communication.
-- Persistent player profiles and match history.
-- Database-backed room and score storage.
-- Custom question packs and difficulty levels.
-- Additional game modes.
-- Private rooms and improved player moderation.
-- Automated tests for room management, scoring, and answer validation.
-- Deployment with production-ready logging and error handling.
-
-## 👨‍💻 Development
-
-To run the project locally:
-
-```powershell
-node server.js
-```
-
-To check JavaScript syntax:
-
-```powershell
-node --check server.js
-node --check public/app.js
-```
-
-After modifying frontend files, refresh the browser. Restart the server when changes to server-side code require it.
-
-## 📌 Project Status
-
-**Version:** 2.0 upgrade
-
-Room Rush has a working local application and room-creation flow. Complete multiplayer gameplay, scoring, timer behavior, and final results should be verified using the testing checklist before being described as fully tested.
+Project Repository: [Room Rush](https://github.com/sankeraswin579-crypto/room-rush)
 
 ## 📄 License
 
-No license has been specified yet. Add a `LICENSE` file if the project is intended to be distributed under an open-source license.
+See the project's `LICENSE` file for licensing terms.
 
 ---
 
-**Room Rush 2.0 — Think fast. Answer faster. Own the leaderboard.**
+**Room Rush — Build your squad. Test your knowledge. Rush to victory!**

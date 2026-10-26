@@ -1,33 +1,38 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101226">
-<title>Room Rush — Trivia together</title><link rel="stylesheet" href="/style.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Room Rush — Multiplayer Trivia</title>
+<link rel="stylesheet" href="/style.css">
 </head>
 <body>
-<div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+<div class="glow glow-a"></div><div class="glow glow-b"></div>
+<header><a class="brand" href="#"><span class="brand-icon">RR</span><span>ROOM <b>RUSH</b><small>TRIVIA PARTY</small></span></a><div class="header-right"><span class="live-dot"></span> REAL-TIME MULTIPLAYER</div></header>
 <main>
-<header><a class="brand" href="/"><i>✦</i> ROOM RUSH</a><span class="live"><i></i> LIVE PARTY GAME</span></header>
-<section id="home">
-<div class="hero-copy">
-<div class="season"><b>SEASON 01</b> THE QUICK-FIRE QUIZ</div>
-<h1>Bring the<br><em>party energy.</em></h1>
-<p>Make a room, rally your crew, and race through a high-voltage trivia showdown from any screen.</p>
-<div class="feature-list"><span>⚡ 8 rapid rounds</span><span>✦ Up to 20 players</span><span>⌁ Free to play</span></div>
-<div class="form-card"><label for="name">PLAYER TAG</label><input id="name" maxlength="20" placeholder="e.g. Alex"><div class="actions"><button id="create">Create a room <b>↗</b></button><div><input id="code" maxlength="4" placeholder="ROOM CODE"><button id="join">Join</button></div></div></div>
+<section id="home" class="home">
+<div class="eyebrow"><span>✦</span> FRIENDS. QUESTIONS. GLORY.</div>
+<h1>Think fast.<br><span>Play together.</span></h1>
+<p class="intro">The trivia party where every second counts. Create a room, invite your crew, and see who really knows it all.</p>
+<div class="panel">
+<label for="name">PLAYER NAME</label><input id="name" maxlength="18" placeholder="Enter your nickname" value="">
+<div class="home-actions"><button id="createBtn" class="primary">＋ Create a room</button><div class="join-group"><input id="roomCode" maxlength="4" placeholder="ROOM CODE" autocomplete="off"><button id="joinBtn" class="secondary">Join ↗</button></div></div>
 <div id="homeError" class="error"></div>
 </div>
-<div class="hero-visual" aria-hidden="true">
-<div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
-<div class="game-card"><div><span>ROOM RUSH</span><b>08:42</b></div><h2>WHO'S TAKING<br>THE CROWN?</h2><section><i class="active">A&nbsp; YOU</i><i>B&nbsp; THEM</i><i>C&nbsp; BOTH</i><i>D&nbsp; CHAOS</i></section><footer><span>ROUND <b>04/08</b></span><strong>● LIVE</strong></footer></div>
-<div class="float-chip chip-one">+100 <small>PERFECT</small></div><div class="float-chip chip-two">✦ 12 PLAYERS</div>
+<div class="feature-row"><span>⚡ <b>15-second rounds</b></span><span>♟ <b>2–20 players</b></span><span>🏆 <b>Live leaderboard</b></span></div>
+</section>
+<section id="game" class="game hidden">
+<div class="game-top"><button id="leaveBtn" class="ghost">← Home</button><div class="room-chip">ROOM CODE <strong id="codeShow">----</strong><button id="copyBtn" title="Copy room code">▣</button></div><span id="role" class="role">PLAYER</span></div>
+<div class="game-layout">
+<aside class="players-panel"><div class="panel-heading"><span>PLAYERS</span><span id="playerCount" class="count">0</span></div><div id="players" class="players"></div><div class="host-note">✦ Invite friends with your room code</div></aside>
+<section class="play-panel"><div class="round-line"><span id="statusPill" class="pill">WAITING ROOM</span><span id="roundLabel">READY WHEN YOU ARE</span></div>
+<div id="lobbyContent" class="lobby-content"><div class="big-icon">✦</div><h2>Build your squad.</h2><p>Share the room code with friends. When at least two players have joined, the host can launch the game.</p><button id="startBtn" class="primary start">Start the game →</button><div id="startHint" class="hint">Waiting for more players…</div></div>
+<div id="questionContent" class="question-content hidden"><div class="timer-wrap"><div id="timerBar" class="timer-bar"></div></div><div id="category" class="category">GENERAL</div><h2 id="questionText">Question goes here?</h2><div id="answers" class="answers"></div><div id="answerHint" class="hint"></div></div>
+<div id="revealContent" class="reveal-content hidden"><div class="big-icon">✓</div><h2>Round complete!</h2><p id="revealText">The correct answer was…</p><p class="hint">Next round starting shortly.</p></div>
+<div id="finishedContent" class="finished-content hidden"><div class="big-icon">🏆</div><h2>Game over!</h2><p id="winnerText">Champion!</p><button id="playAgainBtn" class="primary">Play another round ↻</button></div>
+<div id="gameError" class="error"></div></section>
 </div>
-<div class="steps"><span><b>01</b> Create a room</span><span><b>02</b> Share the code</span><span><b>03</b> Play for glory</span></div>
 </section>
-<section id="game" class="hidden">
-<div class="head"><div><small id="role"></small><h2 id="title"></h2></div><div class="room">ROOM CODE <b id="codeShow"></b><button id="copy">Copy code</button></div></div>
-<div class="layout"><article><small id="pill"></small><div id="content"></div><div id="controls"></div></article><aside><b>LEADERBOARD <span id="count"></span></b><div id="players"></div><small class="score-note">SCORE 100 FOR EVERY HIT</small></aside></div>
-<div id="gameError" class="error"></div><button id="leave" class="leave">← Leave room</button>
-</section>
-<footer class="page-footer">MADE FOR THE GROUP CHAT <b>✦</b> NO DOWNLOAD NEEDED</footer>
-</main><script src="/app.js"></script></body></html>
+</main>
+<footer><span>ROOM RUSH © 2026</span><span>MADE FOR THE COMPETITIVE FRIEND GROUP</span></footer>
+<script src="/socket.io/socket.io.js"></script><script src="/app.js"></script>
+</body></html>
